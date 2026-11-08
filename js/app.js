@@ -34,6 +34,8 @@
     'вагон': ['вагон', 'вагона', 'вагонов']
   };
   function objWord(label, n) { var f = OBJ[label] || [label, label, label]; return plural(n, f); }
+  function goal(n) { if (window.DPAnalytics) window.DPAnalytics.goal(n); }
+  function zipHref() { return encodeURI(CFG.zipFile || 'invoices/DokPotok_demo_invoices.zip'); }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function nowStr() {
@@ -56,7 +58,7 @@
       var list = (d.fileNames || []).map(baseName);
       if (list.indexOf(base) !== -1) return d;
     }
-    var m = /(?:^|[^a-zа-я0-9])doc[\s_\-]*0*(\d+)(?!\d)/i.exec(base) || /^doc[\s_\-]*0*(\d+)(?!\d)/i.exec(base);
+    var m = /(?:^|[^a-zа-яё0-9])doc[\s_\-]*0*(\d+)(?!\d)/i.exec(base) || /(?:^|[^a-zа-яё0-9])сч[её]т[\s_\-]*0*(\d+)(?!\d)/i.exec(base);
     if (m) {
       var key = 'doc' + parseInt(m[1], 10);
       for (i = 0; i < DOCS.length; i++) if (DOCS[i].key === key) return DOCS[i];
@@ -90,7 +92,7 @@
   ];
 
   var state = {
-    screen: 'login', settingsTab: 'docs', items: [], modal: null, nextId: 1, settingsFiles: {}, pw: false, newId: null
+    screen: 'intro', settingsTab: 'docs', items: [], modal: null, nextId: 1, settingsFiles: {}, pw: false, newId: null
   };
   var seedDoc = DOCS.filter(function (d) { return d.key === 'doc1'; })[0] || DOCS[0];
   if (seedDoc) {
@@ -124,12 +126,29 @@
   function screenLogin() {
     return '<div class="login-wrap"><form class="login" id="login-form" autocomplete="off">' +
       '<div class="logo"><i></i>ДокПоток</div><h1>Вход в систему</h1><p class="sub">Автоматическая обработка финансовых документов</p>' +
-      '<div class="field"><label for="email">Email</label><input class="input" id="email" type="text" placeholder="name@company.ru"></div>' +
-      '<div class="field"><label for="pw">Пароль</label><div class="input-wrap"><input class="input" id="pw" type="' + (state.pw ? 'text' : 'password') + '" placeholder="••••••••">' +
+      '<div class="field"><label for="email">Email</label><input class="input ym-disable-keys" id="email" type="text" placeholder="name@company.ru"></div>' +
+      '<div class="field"><label for="pw">Пароль</label><div class="input-wrap"><input class="input ym-disable-keys" id="pw" type="' + (state.pw ? 'text' : 'password') + '" placeholder="••••••••">' +
       '<button type="button" class="icon-btn" data-act="toggle-pw" data-log="Показать пароль" aria-label="Показать пароль">' + ic(state.pw ? 'eyeoff' : 'eye', 14) + '</button></div></div>' +
       '<button class="btn block" type="submit" data-log="Войти">Войти</button>' +
       '<button type="button" class="forgot" data-act="forgot">Забыли пароль?</button>' +
       '<div class="demo-note"><b>Демо:</b> введите любой email и пароль.</div></form></div>';
+  }
+
+  function screenIntro() {
+    var files = DOCS.map(function (d) {
+      return '<li><a href="' + esc(encodeURI('invoices/' + d.invoiceFile)) + '" download data-act="dl-invoice" data-name="' + esc(d.invoiceFile) + '" data-log="Скачать ' + esc(d.invoiceFile) + '">' + ic('filetext', 12) + esc(d.invoiceFile) + '</a></li>';
+    }).join('');
+    return '<div class="login-wrap intro-wrap"><div class="login intro"><div class="logo"><i></i>ДокПоток</div><h1>Демо стенд</h1>' +
+      '<p class="sub">Интерактивный прототип: загрузите тестовый счет и посмотрите, как система извлекает данные и раскладывает расходы по перевозкам.</p>' +
+      '<ol class="steps"><li><span class="n">1</span><div><b>Скачайте набор тестовых счетов</b><p>12 файлов PDF в одном архиве. Распакуйте его: файлы понадобятся на третьем шаге.</p>' +
+      '<a class="btn" href="' + zipHref() + '" download data-act="dl-zip" data-log="Скачать набор счетов (ZIP)">' + ic('download', 14) + 'Скачать набор счетов (ZIP)</a>' +
+      '<details><summary>Или скачайте счета по одному</summary><ul class="files">' + files + '</ul></details></div></li>' +
+      '<li><span class="n">2</span><div><b>Откройте демо</b><p>Войдите с любым email и паролем.</p></div></li>' +
+      '<li><span class="n">3</span><div><b>Загрузите счет из набора</b><p>В очереди нажмите «Загрузить счет», выберите любой файл из архива, проверьте разноску и подтвердите проводки.</p></div></li></ol>' +
+      '<div class="warn-note"><b>Это прототип.</b> Он работает только с этими счетами: свои документы загрузить не получится, на реальных счетах система работает иначе.</div>' +
+      '<button class="btn block" data-act="start-demo" data-log="Перейти к демо">Перейти к демо →</button>' +
+      '<button type="button" class="forgot" data-act="cookie-settings">Настройки cookie</button>' +
+      '<div class="demo-note">Действия в демо записываются обезличенно, чтобы улучшать интерфейс.</div></div></div>';
   }
 
   function qBadge(key) { var b = BADGE[key]; return '<span class="badge ' + b[0] + '">' + (key === 'processing' ? '<i class="spin"></i>' : '') + b[1] + '</span>'; }
@@ -155,6 +174,7 @@
     return '<div class="app">' + header('queue') + '<div class="app-body">' +
       '<div class="metrics">' + metric('Обработано сегодня', '47', '+12 к вчерашнему') + metric('На проверке', '12', '3 срочных') +
       metric('Требуют внимания', '3', '1 дубль · 2 расхождения') + metric('Сэкономлено', '6.5 ч', '≈ 1 рабочий день') + '</div>' +
+      '<div class="hint-bar">' + ic('info', 14) + '<span>Это прототип: загружайте только счета из набора. Свои файлы система не примет.</span><a href="' + zipHref() + '" download data-act="dl-zip" data-log="Скачать набор счетов (ZIP)">Скачать набор счетов</a></div>' +
       '<div class="panel"><div class="panel-head"><h3>Очередь документов</h3><div class="panel-actions">' +
       '<div class="dz-inline" data-act="pick-queue" data-log="Перетащите или выберите файл">' + ic('upload', 13) + '<span>Перетащите или <u>выберите файл</u></span></div>' +
       '<button class="btn sm outline" data-act="pick-queue" data-log="Загрузить счет">' + ic('upload', 14) + 'Загрузить счет</button></div></div>' +
@@ -255,7 +275,7 @@
     var col = '<colgroup>' + widths.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
     var head = '<tr><th>Дата</th><th>Счет Дт</th><th>Счет Кт</th><th>Поставщик</th><th>Валюта</th><th>Сумма</th><th>Перевозка</th><th>Плательщик</th><th>Номер документа</th><th>Описание расхода</th><th>База распределения</th><th></th></tr>';
     var banner = it.confirmed
-      ? '<div class="banner ok">' + ic('checkcircle', 16) + '<span>Проводки созданы. Файл разноски готов к скачиванию. Суммы указаны без НДС.</span></div>'
+      ? '<div class="banner ok">' + ic('checkcircle', 16) + '<span>Проводки созданы. Файл разноски готов к скачиванию. Суммы указаны без НДС.<br><a href="' + esc((CFG.landingUrl || '#') + '#pilot') + '" target="_blank" rel="noopener" data-act="pilot-cta" data-log="Запросить пилот">Хотите так же на ваших счетах? Запросить пилот →</a></span></div>'
       : '<div class="banner">' + ic('info', 16) + '<span>Проверьте проводки перед подтверждением: ячейки можно редактировать, строки – добавлять и удалять. Суммы указаны без НДС.</span></div>';
     var actions = it.confirmed
       ? '<button class="btn" disabled>' + ic('check', 14) + 'Проводки созданы</button>' +
@@ -272,6 +292,16 @@
     var root = $('#modal-root'), m = state.modal;
     var prev = root.firstChild ? root.firstChild.scrollTop : 0;
     if (!m) { root.innerHTML = ''; document.body.style.overflow = ''; return; }
+    if (m.foreign) {
+      var many = m.names.length > 1;
+      document.body.style.overflow = 'hidden';
+      root.innerHTML = '<div class="overlay" data-act="overlay"><div class="dialog" role="dialog" aria-modal="true"><h3>Это демо работает только со счетами из набора</h3><p>' +
+        (many ? 'Выбранные файлы не из набора.' : 'Файл «' + esc(m.names[0]) + '» не из набора.') +
+        ' Это прототип: на реальных счетах система работает иначе. Скачайте тестовые счета и загрузите любой из них.</p><div class="row">' +
+        '<a class="btn" href="' + zipHref() + '" download data-act="dl-zip" data-log="Скачать набор счетов (ZIP)">' + ic('download', 14) + 'Скачать набор счетов (ZIP)</a>' +
+        '<button class="btn outline" data-act="modal-close" data-log="Закрыть">Закрыть</button></div></div></div>';
+      return;
+    }
     var it = find(m.id);
     if (!it) { state.modal = null; return renderModal(); }
     var inv = it.doc && it.doc.invoice, ok = it.status === 'binding' || it.status === 'ready';
@@ -293,7 +323,7 @@
   function render() {
     var app = $('#app');
     var scr = state.screen;
-    app.innerHTML = scr === 'login' ? screenLogin() : scr === 'queue' ? screenQueue() : scr === 'analytics' ? screenAnalytics() : screenSettings();
+    app.innerHTML = scr === 'intro' ? screenIntro() : scr === 'login' ? screenLogin() : scr === 'queue' ? screenQueue() : scr === 'analytics' ? screenAnalytics() : screenSettings();
     state.newId = null;
   }
   function go(screen) {
@@ -309,9 +339,15 @@
 
   function handleQueueFiles(files, via) {
     if (!files || !files.length) return;
-    var list = Array.prototype.slice.call(files), firstItem = null;
+    var list = Array.prototype.slice.call(files), firstItem = null, foreign = [];
     list.forEach(function (file) {
       var doc = matchDoc(file.name);
+      if (!doc) {
+        foreign.push(file.name);
+        Log.event('upload', { name: file.name, size: file.size, doc: null, via: via });
+        goal('invoice_foreign_upload');
+        return;
+      }
       var it = {
         id: 'u' + (state.nextId++), doc: doc, fileName: file.name, size: file.size, uploadedAt: nowStr(),
         status: 'processing', rows: doc ? clone(doc.rows) : [], confirmed: false, edits: 0, openedAt: 0
@@ -319,7 +355,8 @@
       state.items.unshift(it);
       if (!firstItem) firstItem = it;
       state.newId = it.id;
-      Log.event('upload', { name: file.name, size: file.size, doc: doc ? doc.key : null, via: via, id: it.id });
+      Log.event('upload', { name: file.name, size: file.size, doc: doc.key, via: via, id: it.id });
+      goal('invoice_upload');
       setTimeout(function () {
         it.status = doc ? 'binding' : 'error';
         Log.event('extraction_done', { id: it.id, doc: doc ? doc.key : null, ok: !!doc });
@@ -328,6 +365,8 @@
         if (!doc) toast('Не удалось распознать документ «' + file.name + '»', true);
       }, CFG.processingMs || 2600);
     });
+    if (!firstItem) { state.modal = { foreign: true, names: foreign }; Log.event('foreign_dialog', { names: foreign }); renderModal(); return; }
+    if (foreign.length) toast('Файлы не из набора пропущены: ' + foreign.length, true);
     if (state.screen !== 'queue') go('queue'); else render();
     if (CFG.autoOpenAfterUpload && firstItem) openDoc(firstItem.id, 'auto');
   }
@@ -348,7 +387,7 @@
   }
   function closeModal() {
     if (!state.modal) return;
-    Log.event('modal_close', { id: state.modal.id, tab: state.modal.tab });
+    Log.event('modal_close', { id: state.modal.id || 'foreign', tab: state.modal.tab || '' });
     state.modal = null; renderModal();
   }
 
@@ -378,6 +417,11 @@
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.getAttribute('data-act'), it, m = state.modal;
     switch (act) {
+      case 'start-demo': go('login'); break;
+      case 'dl-zip': Log.event('download_zip', {}); goal('invoices_zip_download'); toast('Архив скачивается. Распакуйте его: файлы понадобятся для загрузки'); break;
+      case 'dl-invoice': Log.event('download_invoice', { name: el.getAttribute('data-name') }); goal('invoice_single_download'); break;
+      case 'cookie-settings': if (window.DPAnalytics) window.DPAnalytics.showBanner(); break;
+      case 'pilot-cta': Log.event('pilot_cta', {}); goal('pilot_cta_click'); break;
       case 'overlay': if (e.target === el) closeModal(); break;
       case 'modal-close': closeModal(); break;
       case 'nav': if (el.getAttribute('data-to') !== state.screen) go(el.getAttribute('data-to')); break;
@@ -397,7 +441,9 @@
         it = find(m.id);
         if (el.getAttribute('aria-disabled') === 'true') { toast('Дождитесь завершения обработки документа'); break; }
         if (el.getAttribute('data-tab') === m.tab) break;
-        m.tab = el.getAttribute('data-tab'); Log.event('tab_switch', { tab: m.tab, id: m.id }); renderModal(); break;
+        m.tab = el.getAttribute('data-tab'); Log.event('tab_switch', { tab: m.tab, id: m.id });
+        if (m.tab === 'sheet' && it && !it.sheetGoal) { it.sheetGoal = true; goal('sheet_open'); }
+        renderModal(); break;
       case 'row-del':
         it = find(m.id); var i = +el.getAttribute('data-i');
         Log.event('row_delete', { id: it.id, row: i, desc: it.rows[i] && it.rows[i].desc, amount: it.rows[i] && it.rows[i].amount });
@@ -416,7 +462,7 @@
       case 'confirm':
         it = find(m.id);
         if (!it.rows.length) { toast('Добавьте хотя бы одну проводку', true); break; }
-        it.confirmed = true; it.status = 'ready';
+        it.confirmed = true; it.status = 'ready'; goal('confirm_posting');
         Log.event('confirm', { id: it.id, doc: it.doc.key, rows: it.rows.length, total: sum(it.rows), edits: it.edits, ms_since_open: Date.now() - it.openedAt });
         render(); renderModal(); toast('Проводки созданы');
         break;
@@ -448,6 +494,7 @@
   function onSubmit(e) {
     if (e.target.id !== 'login-form') return;
     e.preventDefault();
+    goal('demo_login');
     Log.event('login', { email_filled: !!$('#email').value, pw_filled: !!$('#pw').value });
     go('queue');
   }
@@ -513,7 +560,8 @@
   Log.event('session_start', { version: CFG.version, ua: navigator.userAgent.slice(0, 80), w: window.innerWidth, h: window.innerHeight });
   if (!DOCS.length) toast('Нет данных документов: запустите tools/build_docs.py', true);
   render();
-  Log.event('screen_view', { screen: 'login' });
+  Log.event('screen_view', { screen: 'intro' });
+  goal('demo_open');
 
   window.DP = { state: state, matchDoc: matchDoc };
 })();

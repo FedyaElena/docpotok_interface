@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Создает временные PDF-счета doc1.pdf ... doc12.pdf в папке test-files/ по данным data/docs.js.
-Нужны для проверки прототипа, пока нет настоящих счетов. Требуется: pip install reportlab"""
+"""Создает временные PDF-счета в папке invoices/ (имена из поля «Имя файла») и архив
+invoices/DokPotok_demo_invoices.zip по данным data/docs.js. Нужны, пока нет настоящих счетов.
+Если положите свои PDF в invoices/ под теми же именами, запускайте только сборку архива:
+    python tools/make_test_pdfs.py --zip-only
+Требуется: pip install reportlab"""
 import json
+import sys
+import zipfile
 from pathlib import Path
 
 from reportlab.lib.pagesizes import A4
@@ -25,7 +30,7 @@ else:
 
 t = (ROOT / "data" / "docs.js").read_text(encoding="utf-8")
 docs = json.loads(t[t.index("=") + 1:].strip().rstrip(";"))
-out = ROOT / "test-files"
+out = ROOT / "invoices"
 out.mkdir(exist_ok=True)
 
 
@@ -33,9 +38,9 @@ def m(n):
     return "{:,.2f}".format(n).replace(",", " ").replace(".", ",")
 
 
-for d in docs:
+for d in ([] if "--zip-only" in sys.argv else docs):
     inv = d["invoice"]
-    c = canvas.Canvas(str(out / (d["key"] + ".pdf")), pagesize=A4)
+    c = canvas.Canvas(str(out / d["invoiceFile"]), pagesize=A4)
     W, H = A4
     y = H - 60
     c.setFont("FB", 14); c.drawString(50, y, "СЧЕТ-ФАКТУРА № %s от %s" % (inv["number"], inv["date"]))
@@ -57,4 +62,14 @@ for d in docs:
     c.drawRightString(W - 50, y, "НДС %s%%: %s" % (inv["vatRate"], m(inv["vat"]))); y -= 15
     c.setFont("FB", 11); c.drawRightString(W - 50, y, "Всего к оплате: " + m(inv["total"]))
     c.save()
+
+def make_zip():
+    z = out / "DokPotok_demo_invoices.zip"
+    with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as f:
+        for d in docs:
+            f.write(out / d["invoiceFile"], d["invoiceFile"])
+    print("Архив:", z)
+
+
+make_zip()
 print("PDF созданы в", out)

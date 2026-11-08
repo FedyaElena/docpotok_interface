@@ -7,5 +7,12 @@ window.DP_CONFIG = {
   // Куда отправлять журнал действий (адрес Google Apps Script или другого сервиса).
   // Пусто = журнал хранится только в браузере (скачать: Ctrl+Shift+L).
   logEndpoint: "",
-  version: "0.1"
+  // Яндекс Метрика: номер счетчика лендинга. Пусто = Метрика не подключается.
+  ymId: 113996900,
+  // Адреса лендинга (для кнопки «Запросить пилот» и ссылки на политику)
+  landingUrl: "https://dokpotok.tech/",
+  privacyUrl: "https://dokpotok.tech/privacy.html",
+  // Файлы для скачивания лежат в папке invoices/
+  zipFile: "invoices/DokPotok_demo_invoices.zip",
+  version: "0.2"
 };

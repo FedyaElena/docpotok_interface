@@ -3,8 +3,9 @@ window.DOCS = [
  {
   "key": "doc1",
   "fileNames": [
-   "doc1.pdf"
+   "Счет_01_МорТранс.pdf"
   ],
+  "invoiceFile": "Счет_01_МорТранс.pdf",
   "invoice": {
    "supplier": "ООО «МорТранс»",
    "inn": "7703456789",
@@ -235,8 +236,9 @@ window.DOCS = [
  {
   "key": "doc2",
   "fileNames": [
-   "doc2.pdf"
+   "Счет_02_ИП_Сорокин.pdf"
   ],
+  "invoiceFile": "Счет_02_ИП_Сорокин.pdf",
   "invoice": {
    "supplier": "ИП Сорокин А.В.",
    "inn": "502401234567",
@@ -272,8 +274,9 @@ window.DOCS = [
  {
   "key": "doc3",
   "fileNames": [
-   "doc3.pdf"
+   "Счет_03_Феникс_Лог.pdf"
   ],
+  "invoiceFile": "Счет_03_Феникс_Лог.pdf",
   "invoice": {
    "supplier": "АО «Феникс Лог»",
    "inn": "7728123456",
@@ -608,8 +611,9 @@ window.DOCS = [
  {
   "key": "doc4",
   "fileNames": [
-   "doc4.pdf"
+   "Счет_04_СкайКарго.pdf"
   ],
+  "invoiceFile": "Счет_04_СкайКарго.pdf",
   "invoice": {
    "supplier": "ООО «СкайКарго»",
    "inn": "7714998877",
@@ -697,8 +701,9 @@ window.DOCS = [
  {
   "key": "doc5",
   "fileNames": [
-   "doc5.pdf"
+   "Счет_05_ТК_Даль.pdf"
   ],
+  "invoiceFile": "Счет_05_ТК_Даль.pdf",
   "invoice": {
    "supplier": "ТК «Даль»",
    "inn": "2536112233",
@@ -773,8 +778,9 @@ window.DOCS = [
  {
   "key": "doc6",
   "fileNames": [
-   "doc6.pdf"
+   "Счет_06_ВостТранс.pdf"
   ],
+  "invoiceFile": "Счет_06_ВостТранс.pdf",
   "invoice": {
    "supplier": "ООО «ВостТранс»",
    "inn": "2721334455",
@@ -1033,8 +1039,9 @@ window.DOCS = [
  {
   "key": "doc7",
   "fileNames": [
-   "doc7.pdf"
+   "Счет_07_Балтик_Шиппинг.pdf"
   ],
+  "invoiceFile": "Счет_07_Балтик_Шиппинг.pdf",
   "invoice": {
    "supplier": "ООО «Балтик Шиппинг»",
    "inn": "7802556677",
@@ -1213,8 +1220,9 @@ window.DOCS = [
  {
   "key": "doc8",
   "fileNames": [
-   "doc8.pdf"
+   "Счет_08_ТрансКонтинент.pdf"
   ],
+  "invoiceFile": "Счет_08_ТрансКонтинент.pdf",
   "invoice": {
    "supplier": "ООО «ТрансКонтинент»",
    "inn": "7743990011",
@@ -1367,8 +1375,9 @@ window.DOCS = [
  {
   "key": "doc9",
   "fileNames": [
-   "doc9.pdf"
+   "Счет_09_Порт-Сервис.pdf"
   ],
+  "invoiceFile": "Счет_09_Порт-Сервис.pdf",
   "invoice": {
    "supplier": "ООО «Порт-Сервис»",
    "inn": "2310445566",
@@ -1510,8 +1519,9 @@ window.DOCS = [
  {
   "key": "doc10",
   "fileNames": [
-   "doc10.pdf"
+   "Счет_10_ИП_Мельников.pdf"
   ],
+  "invoiceFile": "Счет_10_ИП_Мельников.pdf",
   "invoice": {
    "supplier": "ИП Мельников К.Д.",
    "inn": "165012345678",
@@ -1560,8 +1570,9 @@ window.DOCS = [
  {
   "key": "doc11",
   "fileNames": [
-   "doc11.pdf"
+   "Счет_11_СибЛогистик.pdf"
   ],
+  "invoiceFile": "Счет_11_СибЛогистик.pdf",
   "invoice": {
    "supplier": "АО «СибЛогистик»",
    "inn": "5405778899",
@@ -1766,8 +1777,9 @@ window.DOCS = [
  {
   "key": "doc12",
   "fileNames": [
-   "doc12.pdf"
+   "Счет_12_Альфа-Экспедиция.pdf"
   ],
+  "invoiceFile": "Счет_12_Альфа-Экспедиция.pdf",
   "invoice": {
    "supplier": "ООО «Альфа-Экспедиция»",
    "inn": "7725667788",
